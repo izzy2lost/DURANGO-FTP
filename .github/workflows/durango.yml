@@ -14,8 +14,8 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-    
+    runs-on: windows-2022
+
     env:
       SolutionPath: UniversalFtpServer.sln
       Platform: x64
@@ -27,13 +27,7 @@ jobs:
       PackageOutputRootDir: C:\AppPackage
       PackageOutputDir: UniversalFtpServer
 
-    steps:            
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-        
-      - name: Setup NuGet.exe for use with actions
-        uses: NuGet/setup-nuget@v2.0.0
-        
+    steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
@@ -42,19 +36,27 @@ jobs:
       - name: Checkout tag
         run: git checkout tags/v1.2
 
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet.exe for use with actions
+        uses: NuGet/setup-nuget@v2.0.0
+
       - name: Generate Self-Signed Certificate
         id: generate_cert
         run: |
           $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" -Subject "CN=MyUWPCert" -KeyAlgorithm RSA -KeyLength 2048 -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(1) -Type CodeSigningCert
-          $thumbprint = $cert.Thumbprint
-          $cert | Format-List -Property *
-          echo "THUMBPRINT=$thumbprint" >> $env:GITHUB_ENV
+          echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
         shell: pwsh
 
       - name: Set Package Name
         id: set_package_name
         run: |
           echo "PACKAGE_NAME=${{ github.event.inputs.package_name }}_${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+
+      - name: Verify Thumbprint
+        run: echo "Using Certificate Thumbprint: ${{ env.THUMBPRINT }}"
+        shell: pwsh
 
       - name: App Build
         run: |
@@ -63,7 +65,6 @@ jobs:
             /p:Configuration=$env:Configuration `
             /p:UapAppxPackageBuildMode=$env:BuildMode `
             /p:AppxBundle=$env:AppxBundle `
-            /p:AppxPackageSigningEnabled=true `
             /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
             /p:AppxPackageTestDir="${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}" `
             /restore
