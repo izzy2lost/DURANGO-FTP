@@ -16,8 +16,6 @@ jobs:
       Configuration: Release
       AppxBundle: Never
       PackageOutputRootDir: UniversalFtpServer/appx
-      CERT_FILE: UniversalFtpServer_TemporaryKey.pfx
-      CERT_KEY: ${{ secrets.CERT_KEY }}
 
     steps:
     - uses: actions/checkout@v2
@@ -60,9 +58,7 @@ jobs:
           /p:AppxBundle=$env:AppxBundle `
           /p:UapAppxPackageBuildMode="Sideload" `
           /p:AppxPackageSigningEnabled=true `
-          /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
-          /p:PackageCertificateKeyFile="$env:CERT_FILE" `
-          /p:PackageCertificatePassword="$env:CERT_KEY"
+          /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}"
       shell: pwsh
 
     - name: Clean the Package
