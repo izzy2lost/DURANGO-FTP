@@ -46,7 +46,9 @@ jobs:
         id: generate_cert
         run: |
           $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" -Subject "CN=MyUWPCert" -KeyAlgorithm RSA -KeyLength 2048 -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(1) -Type CodeSigningCert
-          echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
+          $thumbprint = $cert.Thumbprint
+          $cert | Format-List -Property *
+          echo "THUMBPRINT=$thumbprint" >> $env:GITHUB_ENV
         shell: pwsh
 
       - name: Set Package Name
