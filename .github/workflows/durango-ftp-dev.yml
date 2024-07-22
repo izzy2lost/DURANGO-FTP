@@ -46,20 +46,19 @@ jobs:
        echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
       shell: pwsh
 
-    - name: Build project
+    - name: App Build
       run: |
-        msbuild `
-          "$env:SolutionPath" `
-          /p:OutputPath=output `
-          /p:Platform=$env:Platform `
-          /p:Configuration=$env:Configuration `
-          /p:AppxBundlePlatforms="x64" `
-          /p:AppxPackageDir="$env:PackageOutputRootDir" `
-          /p:AppxBundle=$env:AppxBundle `
-          /p:UapAppxPackageBuildMode="Sideload" `
-          /p:AppxPackageSigningEnabled=true `
-          /p:PackageCertificateThumbprint=${{ env.THUMBPRINT }}
-      shell: powershell
+       msbuild /restore `
+       "$env:SolutionPath" `
+       /target:"Xbox Linux" `
+       /p:Platform=$env:Platform `
+       /p:Configuration=$env:Configuration `
+       /p:UapAppxPackageBuildMode=$env:BuildMode `
+       /p:AppxBundle=$env:AppxBundle `
+       /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
+       /p:AppxPackageTestDir="${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}" `
+       /p:RestorePackagesConfig=true
+      shell: pwsh
 
     - name: Clean the Package
       run: |
