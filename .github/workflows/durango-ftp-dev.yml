@@ -43,12 +43,10 @@ jobs:
       id: generate_cert
       run: |
         $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" -Subject "CN=MyUWPCert" -KeyAlgorithm RSA -KeyLength 2048 -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(1) -Type CodeSigningCert
-        echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
-      shell: pwsh
+        echo "THUMBPRINT=$($cert.Thumbprint)" >> $GITHUB_ENV
+      shell: powershell
 
     - name: Build project
-      env:
-        THUMBPRINT: ${{ env.THUMBPRINT }}
       run: |
         msbuild `
           "$env:SolutionPath" `
@@ -60,8 +58,8 @@ jobs:
           /p:AppxBundle=$env:AppxBundle `
           /p:UapAppxPackageBuildMode="Sideload" `
           /p:AppxPackageSigningEnabled=true `
-          /p:PackageCertificateThumbprint=$env:THUMBPRINT
-      shell: pwsh
+          /p:PackageCertificateThumbprint=${{ env.THUMBPRINT }}
+      shell: powershell
 
     - name: Clean the Package
       run: |
@@ -80,7 +78,7 @@ jobs:
           Write-Host "Package path does not exist: $PackagePath"
           exit 1
         }
-      shell: pwsh
+      shell: powershell
 
     - name: Create Archive
       run: |
@@ -94,7 +92,7 @@ jobs:
           Write-Host "Package path does not exist for archiving: $PackagePath"
           exit 1
         }
-      shell: pwsh
+      shell: powershell
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4.3.4
