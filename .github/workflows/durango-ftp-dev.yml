@@ -47,6 +47,8 @@ jobs:
       shell: pwsh
 
     - name: Build project
+      env:
+        THUMBPRINT: ${{ env.THUMBPRINT }}
       run: |
         msbuild `
           "$env:SolutionPath" `
@@ -58,7 +60,7 @@ jobs:
           /p:AppxBundle=$env:AppxBundle `
           /p:UapAppxPackageBuildMode="Sideload" `
           /p:AppxPackageSigningEnabled=true `
-          /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}"
+          /p:PackageCertificateThumbprint=$env:THUMBPRINT
       shell: pwsh
 
     - name: Clean the Package
