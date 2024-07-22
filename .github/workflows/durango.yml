@@ -33,9 +33,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout tag
-        run: git checkout tags/v1.2
-
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
 
