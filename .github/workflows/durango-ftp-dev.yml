@@ -24,31 +24,44 @@ jobs:
         
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.0.2
+      
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1
+      with:
+        nuget-version: latest  
         
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       shell: bash
+      
+    - name: NuGet restore
+      run: |
+        nuget restore
         
     - name: Generate Self-Signed Certificate
       id: generate_cert
       run: |
-       $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" -Subject "CN=MyUWPCert" -KeyAlgorithm RSA -KeyLength 2048 -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(1) -Type CodeSigningCert
-       echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
+        $cert = New-SelfSignedCertificate -CertStoreLocation "Cert:\CurrentUser\My" -Subject "CN=MyUWPCert" -KeyAlgorithm RSA -KeyLength 2048 -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" -KeyExportPolicy Exportable -NotAfter (Get-Date).AddYears(1) -Type CodeSigningCert
+        echo "THUMBPRINT=$($cert.Thumbprint)" >> $env:GITHUB_ENV
       shell: pwsh
 
-    - name: App Build
+    - name: Build project
+      env:
+        THUMBPRINT: ${{ env.THUMBPRINT }}
       run: |
-       msbuild /restore `
-       "$env:SolutionPath" `
-       /p:Platform=$env:Platform `
-       /p:Configuration=$env:Configuration `
-       /p:UapAppxPackageBuildMode=$env:BuildMode `
-       /p:AppxBundle=$env:AppxBundle `
-       /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
-       /p:AppxPackageTestDir="${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}" `
-       /p:RestorePackagesConfig=true
-      shell: pwsh
+        msbuild `
+          "$env:SolutionPath" `
+          /p:OutputPath=output `
+          /p:Platform=$env:Platform `
+          /p:Configuration=$env:Configuration `
+          /p:AppxBundlePlatforms="x64" `
+          /p:AppxPackageDir="$env:PackageOutputRootDir" `
+          /p:AppxBundle=$env:AppxBundle `
+          /p:UapAppxPackageBuildMode="Sideload" `
+          /p:AppxPackageSigningEnabled=true `
+          /p:PackageCertificateThumbprint=${{ env.THUMBPRINT }}
+      shell: powershell
 
     - name: Clean the Package
       run: |
@@ -67,7 +80,7 @@ jobs:
           Write-Host "Package path does not exist: $PackagePath"
           exit 1
         }
-      shell: powershell
+      shell: pwsh
 
     - name: Create Archive
       run: |
