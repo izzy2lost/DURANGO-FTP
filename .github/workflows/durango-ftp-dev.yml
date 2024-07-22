@@ -24,20 +24,11 @@ jobs:
         
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1.0.2
-      
-    - name: Setup NuGet.exe for use with actions
-      uses: NuGet/setup-nuget@v1
-      with:
-        nuget-version: latest  
         
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       shell: bash
-      
-    - name: NuGet restore
-      run: |
-        nuget restore
         
     - name: Generate Self-Signed Certificate
       id: generate_cert
