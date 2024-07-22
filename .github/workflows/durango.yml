@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0
 
       - name: Checkout tag
-        run: git checkout tags/v1.1
+        run: git checkout tags/v1.2
 
       - name: Generate Self-Signed Certificate
         id: generate_cert
