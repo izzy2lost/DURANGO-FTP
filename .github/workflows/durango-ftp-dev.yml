@@ -15,7 +15,7 @@ jobs:
       Platform: x64
       Configuration: Release
       AppxBundle: Never
-      PackageOutputRootDir: UniversalFtpServer/appx
+      PackageOutputRootDir: UniversalFtpServer
 
     steps:
     - uses: actions/checkout@v2
