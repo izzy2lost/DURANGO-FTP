@@ -56,6 +56,7 @@ jobs:
             /p:Configuration=$env:Configuration `
             /p:UapAppxPackageBuildMode=$env:BuildMode `
             /p:AppxBundle=$env:AppxBundle `
+            /p:AppxPackageSigningEnabled=true `
             /p:PackageCertificateThumbprint="${{ env.THUMBPRINT }}" `
             /p:AppxPackageTestDir="${{ env.PackageOutputRootDir }}\${{ env.PACKAGE_NAME }}" `
             /restore
