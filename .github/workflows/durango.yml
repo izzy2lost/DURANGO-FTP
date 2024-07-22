@@ -35,7 +35,12 @@ jobs:
         uses: NuGet/setup-nuget@v2.0.0
         
       - name: Checkout Repository
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout tag
+        run: git checkout tags/v1.1
 
       - name: Generate Self-Signed Certificate
         id: generate_cert
